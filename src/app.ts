@@ -1,8 +1,9 @@
 import "@babylonjs/core/Debug/debugLayer";
 import "@babylonjs/inspector";
 import "@babylonjs/loaders/glTF";
-import { Engine, Scene, ArcRotateCamera, Vector3, HemisphericLight, Mesh, MeshBuilder, Color4, FollowCamera, FreeCamera } from "@babylonjs/core";
+import { Engine, Scene, ArcRotateCamera, Vector3, HemisphericLight, Mesh, MeshBuilder, Color4, FollowCamera, FreeCamera, Matrix, Quaternion, StandardMaterial, Color3 } from "@babylonjs/core";
 import { AdvancedDynamicTexture, Button, Control } from "@babylonjs/gui";
+import { Environment } from "./environments";
 
 enum State { START, GAME, LOSE, CUTSCENE }
 
@@ -10,6 +11,7 @@ class App {
   private _scene: Scene;
   private _canvas: HTMLCanvasElement;
   private _engine: Engine;
+  private _environment: Environment;
 
   private _state: State;
   private _gameScene: Scene;
@@ -24,13 +26,6 @@ class App {
     // Scene - related
     this._engine = new Engine(this._canvas, true);
     this._scene = new Scene(this._engine);
-
-    /*
-    const camera: ArcRotateCamera = new ArcRotateCamera("Camera", Math.PI / 2, Math.PI / 2, 2, Vector3.Zero(), this._scene);
-    camera.attachControl(this._canvas, true);
-    const light1: HemisphericLight = new HemisphericLight("light1", new Vector3(1, 1, 0), this._scene);
-    const sphere: Mesh = MeshBuilder.CreateSphere("sphere", { diameter: 1 }, this._scene);
-    */
 
     // add controls to show/hide the inspector
     window.addEventListener("keydown", (ev) => {
@@ -136,6 +131,7 @@ class App {
   }
 
   private async _goToLose(): Promise<void> {
+    console.log("gotolose");
     // loading
     this._engine.displayLoadingUI();
 
@@ -167,6 +163,7 @@ class App {
   }
 
   private async _goToCutScene() {
+    console.log("gotocutscene");
     this._engine.displayLoadingUI();
     this._scene.detachControl();
     this._cutScene = new Scene(this._engine);
@@ -206,16 +203,22 @@ class App {
   }
 
   private async _setUpGame() {
+    console.log('setupgame');
     let scene = new Scene(this._engine);
-    this._scene = scene;
+    this._gameScene = scene;
 
-    // load assets?
+    // instantiate environment
+    const environment = new Environment(scene);
+    this._environment = environment;
+    await this._environment.load();
+    await this._loadCharacterAssets(scene);
   }
 
   private async _goToGame() {
+    console.log("gotogame");
     /* --SETUP SCENE-- */
     this._scene.detachControl();
-    let scene = this._scene;
+    let scene = this._gameScene;
     scene.clearColor = new Color4(0.01568627450980392, 0.01568627450980392, 0.20392156862745098); // a color that fit the overall color scheme better
     let camera: ArcRotateCamera = new ArcRotateCamera("Camera", Math.PI / 2, Math.PI / 2, 2, Vector3.Zero(), scene);
     camera.setTarget(Vector3.Zero());
@@ -237,8 +240,8 @@ class App {
 
     // this handles interactions with the start button attached to the scene
     loseBtn.onPointerDownObservable.add(() => {
-        this._goToLose();
-        scene.detachControl(); // observables disabled
+      this._goToLose();
+      scene.detachControl(); // observables disabled
     });
 
     // temporary scene objects
@@ -254,6 +257,43 @@ class App {
     this._scene.attachControl();
   }
 
+  private _loadCharacterAssets(scene: Scene) {
+    const outer = MeshBuilder.CreateBox("outer", { width: 2, depth: 1, height: 3 }, scene);
+    outer.isVisible = false;
+    outer.isPickable = false;
+    outer.checkCollisions = true;
+
+    // move box collider origin to bottom of mesh
+    outer.bakeTransformIntoVertices(Matrix.Translation(0, 1.5, 0));
+
+    // collisions
+    outer.ellipsoid = new Vector3(1, 1.5, 1);
+    outer.ellipsoidOffset = new Vector3(1, 1.5, 1);
+
+    // rotate character 180 degrees to see back
+    outer.rotationQuaternion = new Quaternion(0, 1, 0, 0);
+
+    const faceColor = new Color4(0, 0, 0, 1);
+    let box = MeshBuilder.CreateBox("small", { width: 0.5, depth: 0.5, height: 0.25, faceColors: [faceColor, faceColor, faceColor, faceColor, faceColor, faceColor] }, scene);
+    box.position.y = 1.5;
+    box.position.x = 1;
+
+    // let body = Mesh.CreateCylinder("body", 3, 2, 2, 0, 0, scene); // depreciated
+    let body = MeshBuilder.CreateCylinder("body", { height: 3, diameterTop: 2, diameterBottom: 2 }, scene);
+    let bodymtl = new StandardMaterial("red", scene);
+    bodymtl.diffuseColor = new Color3(0.8, 0.5, 0.5);
+    body.material = bodymtl;
+    body.isPickable = false;
+    body.bakeTransformIntoVertices(Matrix.Translation(0, 1.5, 0)); // simulate imported mesh's origin
+
+    // parent the mesh's
+    box.parent = body;
+    body.parent = outer;
+    
+    return {
+      mesh: outer as Mesh
+    }
+  }
 }
 
 new App();
