@@ -1,12 +1,12 @@
 import { ActionManager, ExecuteCodeAction, Scalar, Scene } from "@babylonjs/core";
 
 export class PlayerInput {
-    public inputMap;
+    public inputMap: {string: boolean} | {};
 
     public vertical: number;
     public horizonal: number;
-    private _desiredVertical: number;
-    private _desiredHorizonal: number;
+    public desiredVertical: number;
+    public desiredHorizonal: number;
 
     constructor(scene: Scene) {
         scene.actionManager = new ActionManager(scene);
@@ -27,33 +27,28 @@ export class PlayerInput {
     }
 
     private _updateFromKeyboard() {
-        console.log(this.inputMap);
         // vertical axis
         if (this.inputMap["ArrowUp"] || this.inputMap["w"]) {
-            this._desiredVertical = 1;
-            this.vertical = Scalar.Lerp(this.vertical, this._desiredVertical, 0.5);
+            this.desiredVertical = 1;
+            this.vertical = Scalar.Lerp(this.vertical, this.desiredVertical, 0.5);
         } else if (this.inputMap["ArrowDown"] || this.inputMap["s"]) {
-            this._desiredVertical = -1;
-            this.vertical = Scalar.Lerp(this.vertical, this._desiredVertical, 0.5);
+            this.desiredVertical = -1;
+            this.vertical = Scalar.Lerp(this.vertical, this.desiredVertical, 0.5);
         } else {
-            this._desiredVertical = 0;
+            this.desiredVertical = 0;
             this.vertical = 0; 
         }
 
         // horizontal axis
         if (this.inputMap["ArrowLeft"] || this.inputMap["a"]) {
-            this._desiredHorizonal = -1;
-            this.horizonal = Scalar.Lerp(this.horizonal, this._desiredHorizonal, 0.5);
+            this.desiredHorizonal = -1;
+            this.horizonal = Scalar.Lerp(this.horizonal, this.desiredHorizonal, 0.5);
         } else if (this.inputMap["ArrowRight"] || this.inputMap["d"]) {
-            this._desiredHorizonal = 1;
-            this.horizonal = Scalar.Lerp(this.horizonal, this._desiredHorizonal, 0.5);
+            this.desiredHorizonal = 1;
+            this.horizonal = Scalar.Lerp(this.horizonal, this.desiredHorizonal, 0.5);
         } else {
-            this._desiredHorizonal = 0;
+            this.desiredHorizonal = 0;
             this.horizonal = 0; 
         }
-
-        console.log("vertical, horizontal");
-        console.log(this.vertical);
-        console.log(this.horizonal);
     }
 }

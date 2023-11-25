@@ -50,7 +50,6 @@ class App {
   }
 
   private async _main(): Promise<void> {
-    console.log("main");
     await this._goToStart();
 
     // register a render loop
@@ -88,7 +87,6 @@ class App {
   }
 
   private async _goToStart(): Promise<void> {
-    console.log("going to start");
     // loading
     this._engine.displayLoadingUI();
 
@@ -98,7 +96,6 @@ class App {
     scene.clearColor = new Color4(0, 0, 0, 1);
     let camera = new FreeCamera("camera1", new Vector3(0, 0, 0), scene);
     camera.setTarget(Vector3.Zero());
-    console.log(scene);
 
     // GUI
     const guiMenu = AdvancedDynamicTexture.CreateFullscreenUI("UI");
@@ -128,7 +125,6 @@ class App {
   }
 
   private async _goToLose(): Promise<void> {
-    console.log("gotolose");
     // loading
     this._engine.displayLoadingUI();
 
@@ -160,7 +156,6 @@ class App {
   }
 
   private async _goToCutScene() {
-    console.log("gotocutscene");
     this._engine.displayLoadingUI();
     this._scene.detachControl();
     this._cutScene = new Scene(this._engine);
@@ -200,7 +195,6 @@ class App {
   }
 
   private async _setUpGame() {
-    console.log('setupgame');
     let scene = new Scene(this._engine);
     this._gameScene = scene;
 
@@ -212,7 +206,6 @@ class App {
   }
 
   private async _goToGame() {
-    console.log("gotogame");
     /* --SETUP SCENE-- */
     this._scene.detachControl();
     let scene = this._gameScene;
@@ -242,7 +235,6 @@ class App {
     await this._initializeGameAsync(scene);
 
     await scene.whenReadyAsync();
-    console.log(scene.getMeshByName("outer"));
     scene.getMeshByName("outer").position = new Vector3(0, 3, 0);
 
     // get rid of start scene, switch to scene and change states
@@ -270,12 +262,12 @@ class App {
       outer.ellipsoidOffset = new Vector3(1, 1.5, 1);
 
       // rotate character 180 degrees to see back
-      outer.rotationQuaternion = new Quaternion(0, 1, 0, 0);
+      outer.rotationQuaternion = new Quaternion(0, 0, 0, 0);
 
       const faceColor = new Color4(0, 0, 0, 1);
       let box = MeshBuilder.CreateBox("small", { width: 0.5, depth: 0.5, height: 0.25, faceColors: [faceColor, faceColor, faceColor, faceColor, faceColor, faceColor] }, scene);
       box.position.y = 1.5;
-      box.position.x = 1;
+      box.position.z = 1;
 
       let body = MeshBuilder.CreateCylinder("body", { height: 3, diameterTop: 2, diameterBottom: 2 }, scene);
       let bodymtl = new StandardMaterial("red", scene);

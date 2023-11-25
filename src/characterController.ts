@@ -1,4 +1,4 @@
-import { ArcRotateCamera, Camera, Mesh, Scene, ShadowGenerator, TransformNode, UniversalCamera, Vector3 } from "@babylonjs/core";
+import { ArcRotateCamera, Camera, Mesh, Quaternion, Scene, ShadowGenerator, TransformNode, UniversalCamera, Vector3 } from "@babylonjs/core";
 
 export class Player extends TransformNode {
     public camera: UniversalCamera;
@@ -32,8 +32,6 @@ export class Player extends TransformNode {
         // root parent node for camera
         this._camRoot = new TransformNode("root");
         this._camRoot.position = new Vector3(0, 0, 0);
-        // rotate to be in sync with player (odd choice IMO)
-        this._camRoot.rotation = new Vector3(0, Math.PI, 0);
 
         // rotations along x-axis
         let yTilt = new TransformNode("yTilt");
@@ -94,5 +92,14 @@ export class Player extends TransformNode {
         } 
 
         this._moveDirection = this._moveDirection.scaleInPlace(mag * 0.45);
+
+        // check for any inputs
+        if (this._input.desiredHorizonal === 0 && this._input.desiredVertical === 0) return;
+        let angle = Math.atan2(this._input.desiredHorizonal, this._input.desiredVertical);
+        angle += this._camRoot.rotation.y;
+
+        let target = Quaternion.FromEulerAngles(0, angle, 0);
+        this.mesh.rotationQuaternion = Quaternion.Slerp(this.mesh.rotationQuaternion, target, 10 * (this._scene.deltaTime / 1000));
     }
+
 }
