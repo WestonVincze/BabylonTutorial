@@ -5,6 +5,7 @@ import { Engine, Scene, ArcRotateCamera, Vector3, HemisphericLight, Mesh, MeshBu
 import { AdvancedDynamicTexture, Button, Control } from "@babylonjs/gui";
 import { Environment } from "./environments";
 import { Player } from "./characterController";
+import { PlayerInput } from "./inputController";
 
 enum State { START, GAME, LOSE, CUTSCENE }
 
@@ -17,6 +18,7 @@ class App {
   // game state
   public assets;
   private _player: Player;
+  private _playerInput: PlayerInput;
   private _state: State;
   private _gameScene: Scene;
   private _cutScene: Scene;
@@ -214,7 +216,7 @@ class App {
     /* --SETUP SCENE-- */
     this._scene.detachControl();
     let scene = this._gameScene;
-    scene.clearColor = new Color4(0.01568627450980392, 0.01568627450980392, 0.20392156862745098); // a color that fit the overall color scheme better
+    scene.clearColor = new Color4(0.01568627450980392, 0.01568627450980392, 0.20392156862745098);
 
     /* --GUI-- */
     const playerUI = AdvancedDynamicTexture.CreateFullscreenUI("UI");
@@ -275,7 +277,6 @@ class App {
       box.position.y = 1.5;
       box.position.x = 1;
 
-      // let body = Mesh.CreateCylinder("body", 3, 2, 2, 0, 0, scene); // depreciated
       let body = MeshBuilder.CreateCylinder("body", { height: 3, diameterTop: 2, diameterBottom: 2 }, scene);
       let bodymtl = new StandardMaterial("red", scene);
       bodymtl.diffuseColor = new Color3(0.8, 0.5, 0.5);
@@ -297,7 +298,7 @@ class App {
     });
   }
 
-  private async _initializeGameAsync(scene): Promise<void> {
+  private async _initializeGameAsync(scene: Scene): Promise<void> {
     var light0 = new HemisphericLight("HemiLight", new Vector3(0, 1, 0), scene);
 
     const light = new PointLight("sparklight", new Vector3(0, 0, 0), scene);
@@ -308,7 +309,8 @@ class App {
     const shadowGenerator = new ShadowGenerator(1024, light);
     shadowGenerator.darkness = 0.4;
 
-    this._player = new Player(this.assets, scene, shadowGenerator);
+    this._playerInput = new PlayerInput(scene);
+    this._player = new Player(this.assets, scene, shadowGenerator, this._playerInput);
 
     const camera = this._player.activatePlayerCamera();
   }

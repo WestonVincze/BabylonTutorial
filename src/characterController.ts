@@ -6,6 +6,7 @@ export class Player extends TransformNode {
     private _input;
     private _camRoot;
     private _yTilt;
+    private _moveDirection: Vector3;
 
     // Player mesh
     public mesh: Mesh; // collision box of player
@@ -59,9 +60,39 @@ export class Player extends TransformNode {
 
     public activatePlayerCamera(): UniversalCamera {
         this.scene.registerBeforeRender(() => {
+            this._beforeRenderUpdate();
             this._updatePlayerCamera();
         })
 
         return this.camera;
+    }
+
+    private _beforeRenderUpdate(): void {
+        this._updateFromControls();
+        this.mesh.moveWithCollisions(this._moveDirection);
+    }
+
+    private _updateFromControls() {
+        // do we need to reset move direction each frame?
+        this._moveDirection = Vector3.Zero();
+        let fwd = this._camRoot.forward;
+        let right = this._camRoot.right;
+        // scale in pace to 
+        let relativeVertical = fwd.scaleInPlace(this._input.vertical);
+        let relativeHorizontal = right.scaleInPlace(this._input.horizonal);
+
+        let move = relativeHorizontal.addInPlace(relativeVertical);
+
+        this._moveDirection = new Vector3((move).normalize().x, 0, (move).normalize().z);
+
+        let mag = Math.abs(this._input.vertical) + Math.abs(this._input.horizonal);
+
+        if (mag < 0) {
+            mag = 0;
+        } else if (mag > 1) {
+            mag = 1;
+        } 
+
+        this._moveDirection = this._moveDirection.scaleInPlace(mag * 0.45);
     }
 }

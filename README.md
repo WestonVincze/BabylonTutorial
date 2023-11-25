@@ -26,6 +26,9 @@ DRYer code.
 More variables and constants.
 - there are instnaces of hard-coded colors and values that could be extracted into constants (this would make changing values 10x easier and improve code readability by applying meaningful names to code like `Color4(0, 0, 0, 1)` which is just black)
 
+Type safety.
+- this project uses TypeScript but many variables are untyped and have an implicit `any` type
+
 Lose the classes.
 - I like OOP, but as a personal perference I use functional patterns that are more aligned with how JavaScript was originally designed (again, personal preference)
 
