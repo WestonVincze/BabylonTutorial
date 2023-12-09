@@ -28,9 +28,3 @@ More variables and constants.
 
 Type safety.
 - this project uses TypeScript but many variables are untyped and have an implicit `any` type
-
-Lose the classes.
-- I like OOP, but as a personal perference I use functional patterns that are more aligned with how JavaScript was originally designed (again, personal preference)
-
-## Current tutorial progress
-5/16 modules completed
